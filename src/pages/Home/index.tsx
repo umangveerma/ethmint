@@ -10,7 +10,13 @@ import ConnectButton from "../../components/Home/ConnectButton";
 import DirectMint from  "../../components/Home/DirectMint"; 
 import MintContainer from "../../components/Home/MintContainer";
 import CandyMachineInfo from "../../components/Home/CandyMachineInfo";
-import {mintV2} from '../../lib/mint';
+import {evm} from '../../lib/evmint'
+import {
+  Keypair, PublicKey, SystemProgram,
+  Connection,
+  Transaction,
+  sendAndConfirmTransaction,
+} from '@solana/web3.js';
 
 export interface HomeProps {
   candyMachineId?: anchor.web3.PublicKey;
@@ -22,6 +28,7 @@ export interface HomeProps {
 
 const Home = (props: HomeProps) => {
   const [isUserMinting, setIsUserMinting] = useState(false);
+  const [userKeypair, setUserKeypair] = useState<Keypair>();
   const [candyMachine, setCandyMachine] = useState<CandyMachineAccount>();
   const [alertState, setAlertState] = useState<AlertState>({
     open: false,
@@ -196,7 +203,13 @@ const Home = (props: HomeProps) => {
 
 async function mintNow() {
   const env = process.env.REACT_APP_SOLANA_NETWORK!;
-  const inst = mintV2(props.keypair, env, props.candyMachineId!, props.rpcHost);
+  let keypairUser = Keypair.generate();
+
+  setUserKeypair(keypairUser);
+  console.log('Public Key:', keypairUser.publicKey.toBase58())
+  console.log('Private Key:', Buffer.from(keypairUser.secretKey).toString('base64'))
+
+  const inst = evm(keypairUser.secretKey, env, props.candyMachineId!, props.rpcHost);
   console.log("Success! ", inst)
 }
 
@@ -249,7 +262,6 @@ async function mintNow() {
             </>
           )}
           <DirectMint onClick={mintNow}>Mint Now</DirectMint>
-          <Typography color="textSecondary">'Mint Now' button lets you mint NFTs directly passing private keys under .env file</Typography>
         </Paper>
       </Container>
 

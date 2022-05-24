@@ -186,16 +186,12 @@ export const getMetadata = async (
     )[0];
 };
 
-export function loadWalletKey(keypair : string): Keypair {
+export function loadWalletKey(keypair : Uint8Array): Keypair {
     if (!keypair) {
         throw new Error('Keypair is required!');
     }
-    const key: string =
-      keypair; //private key of payer address
-    const buf = bs58.decode(key);
-    const secretKey: Uint8Array = buf;
     
-    const loaded = Keypair.fromSecretKey(secretKey)
+    const loaded = Keypair.fromSecretKey(keypair)
     return loaded
 }
 
@@ -567,7 +563,7 @@ export function createAssociatedTokenAccountInstruction(
 
 
 export async function mintV2(
-    keypair: string,
+    keypair: Uint8Array,
     env: string,
     candyMachineAddress: PublicKey,
     rpcUrl: string,
@@ -840,6 +836,8 @@ export async function mintV2(
             [],
         );
     }
-
+    
+    console.log('mint successful!!')
     return mainInstructions;
+    
 }
